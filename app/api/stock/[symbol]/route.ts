@@ -17,8 +17,10 @@ export async function GET(
     const symbolUpper = symbol.toUpperCase();
 
     // Fetch everything from Flask backend in one go
+    const { searchParams } = new URL(request.url);
+    const period = searchParams.get('period') || '3mo';
     const FLASK_API_URL = process.env.NEXT_PUBLIC_FLASK_API_URL || 'http://localhost:5000';
-    const response = await fetch(`${FLASK_API_URL}/api/stock/${symbolUpper}`);
+    const response = await fetch(`${FLASK_API_URL}/api/stock/${symbolUpper}?period=${period}`);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch from backend: ${response.statusText}`);

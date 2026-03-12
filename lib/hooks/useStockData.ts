@@ -1,7 +1,7 @@
 import { useQuery } from '@/lib/queryClient';
 
-export async function fetchStockData(symbol: string) {
-  const response = await fetch(`/api/stock/${symbol}`);
+export async function fetchStockData(symbol: string, period: string = '3mo') {
+  const response = await fetch(`/api/stock/${symbol}?period=${period}`);
 
   if (!response.ok) {
     throw new Error(`Failed to fetch stock data: ${response.statusText}`);
@@ -10,10 +10,10 @@ export async function fetchStockData(symbol: string) {
   return response.json();
 }
 
-export function useStockData(symbol: string) {
+export function useStockData(symbol: string, period: string = '3mo') {
   return useQuery({
-    queryKey: ['stock', symbol],
-    queryFn: () => fetchStockData(symbol),
+    queryKey: ['stock', symbol, period],
+    queryFn: () => fetchStockData(symbol, period),
     enabled: !!symbol,
     refetchOnWindowFocus: false,
   });

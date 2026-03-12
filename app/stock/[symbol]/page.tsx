@@ -115,8 +115,9 @@ export default function StockAnalysisPage({ params }: { params: Promise<{ symbol
   const router = useRouter();
   const { symbol } = use(params);
   const [isIndicatorsExpanded, setIsIndicatorsExpanded] = useState(true);
+  const [chartPeriod, setChartPeriod] = useState('3mo');
 
-  const { data: stockData, isLoading, isError, error } = useStockData(symbol);
+  const { data: stockData, isLoading, isError, error } = useStockData(symbol, chartPeriod);
 
   const indicators = stockData?.candle ? calculateAllIndicators(stockData.candle) : null;
   const latestIndicators = indicators ? getLatestIndicators(indicators) : null;
@@ -192,6 +193,18 @@ export default function StockAnalysisPage({ params }: { params: Promise<{ symbol
               <LineChart 
                 candle={stockData.candle} 
                 symbol={symbol} 
+                onPeriodChange={(period) => {
+                  const periodMap: Record<string, string> = {
+                    '1M': '1mo',
+                    '3M': '3mo',
+                    '6M': '6mo',
+                    '1Y': '1y',
+                    'ALL': 'max'
+                  };
+                  if (periodMap[period]) {
+                    setChartPeriod(periodMap[period]);
+                  }
+                }}
               />
             </div>
 

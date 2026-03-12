@@ -43,7 +43,7 @@ export default function LineChart({ candle, symbol, onPeriodChange }: LineChartP
   const handlePeriodChange = (period: { value: Period; label: string }) => {
     setSelectedPeriod(period.value);
     if (onPeriodChange) {
-      onPeriodChange(period.value === 'ALL' ? '전체' : period.label);
+      onPeriodChange(period.value);
     }
   };
 
@@ -60,20 +60,7 @@ export default function LineChart({ candle, symbol, onPeriodChange }: LineChartP
     }),
   }));
 
-  const getDataByPeriod = (period: Period): DataPoint[] => {
-    const days = {
-      '1M': 22,
-      '3M': 66,
-      '6M': 132,
-      '1Y': 264,
-      'ALL': fullData.length,
-    };
-
-    const daysToShow = days[period];
-    return fullData.slice(-daysToShow);
-  };
-
-  const data = getDataByPeriod(selectedPeriod);
+  const data = fullData;
 
   const minValue = Math.min(...data.map((d) => d.price));
   const maxValue = Math.max(...data.map((d) => d.price));

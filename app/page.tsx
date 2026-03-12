@@ -147,6 +147,19 @@ export default function Home() {
             </div>
           ))}
         </div>
+
+        <footer className="py-12 border-t border-slate-100">
+          <div className="flex flex-col items-center justify-center text-center">
+            <p className="text-sm text-slate-500 mb-2">
+              제작자: <a href="mailto:stevecode278@gmail.com" className="text-emerald-600 font-semibold hover:underline">stevecode278@gmail.com</a>
+            </p>
+            <p className="text-[10px] sm:text-xs text-slate-400 max-w-md leading-relaxed">
+              © 2026 Stock Analyzer. 모든 권리 보유. 
+              본 프로젝트의 소스 코드 및 디자인에 대한 저작권은 제작자에게 있습니다. 
+              상업적 이용 또는 재배포 시 반드시 제작자의 사전 승인을 받아야 합니다.
+            </p>
+          </div>
+        </footer>
       </div>
     </div>
   );

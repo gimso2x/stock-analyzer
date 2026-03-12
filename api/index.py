@@ -7,10 +7,10 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 CORS(app)
 
-def get_stock_data(symbol):
+def get_stock_data(symbol, period='3mo'):
     try:
         ticker = yf.Ticker(symbol)
-        hist = ticker.history(period='3mo', interval='1d')
+        hist = ticker.history(period=period, interval='1d')
 
         if hist.empty:
             return None
@@ -102,12 +102,13 @@ def get_stock_data(symbol):
         }
 
     except Exception as e:
-        print(f"Error fetching data for {symbol}: {e}")
+        print(f"Error fetching data for {symbol} with period {period}: {e}")
         return None
 
 @app.route('/api/stock/<symbol>', methods=['GET'])
 def get_stock(symbol):
-    data = get_stock_data(symbol)
+    period = request.args.get('period', '3mo')
+    data = get_stock_data(symbol, period)
     if data:
         return jsonify(data)
     return jsonify({'error': f'Failed to fetch data for {symbol}'}), 404
