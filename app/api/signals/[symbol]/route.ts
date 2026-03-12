@@ -1,4 +1,4 @@
-import { fetchStockCandles, fetchStockQuote } from '@/lib/finnhub';
+// import { fetchStockCandles, fetchStockQuote } from '@/lib/finnhub';
 import { calculateAllIndicators, getLatestIndicators } from '@/lib/indicators';
 
 export interface TechnicalSignals {
@@ -177,10 +177,16 @@ export async function GET(
     const { symbol } = await params;
     const symbolUpper = symbol.toUpperCase();
 
-    const [quote, candle] = await Promise.all([
-      fetchStockQuote(symbolUpper),
-      fetchStockCandles(symbolUpper, 'D'),
-    ]);
+    // 1. Fetch data from Flask backend
+    const FLASK_API_URL = process.env.NEXT_PUBLIC_FLASK_API_URL || 'http://localhost:5000';
+    const response = await fetch(`${FLASK_API_URL}/api/stock/${symbolUpper}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch from backend: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const { quote, candle } = data;
 
     const allIndicators = calculateAllIndicators(candle);
     const latestIndicators = getLatestIndicators(allIndicators);

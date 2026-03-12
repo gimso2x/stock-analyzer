@@ -35,13 +35,13 @@ export default function TradingSignalCard({ signals }: TradingSignalCardProps) {
   const getTrendColor = (trend: string) => {
     switch (trend) {
       case '강력 매수':
-        return 'bg-green-600 text-white';
-      case '매수':
-        return 'bg-green-500 text-white';
-      case '강력 매도':
         return 'bg-red-600 text-white';
-      case '매도':
+      case '매수':
         return 'bg-red-500 text-white';
+      case '강력 매도':
+        return 'bg-blue-600 text-white';
+      case '매도':
+        return 'bg-blue-500 text-white';
       default:
         return 'bg-slate-600 text-white';
     }
@@ -56,7 +56,7 @@ export default function TradingSignalCard({ signals }: TradingSignalCardProps) {
       case '과매도':
       case '하단 이탈':
       case '약세':
-        return 'text-green-600 bg-green-50 border-green-200';
+        return 'text-blue-600 bg-blue-50 border-blue-200';
       default:
         return 'text-slate-600 bg-slate-50 border-slate-200';
     }
@@ -103,8 +103,8 @@ export default function TradingSignalCard({ signals }: TradingSignalCardProps) {
         <div className="flex items-center justify-between">
           <span className="text-sm text-slate-600">추천 사항</span>
           <span className={`text-sm font-bold ${
-            signals.recommendations.action === 'BUY' ? 'text-green-600' :
-            signals.recommendations.action === 'SELL' ? 'text-red-600' :
+            signals.recommendations.action === 'BUY' ? 'text-red-600' :
+            signals.recommendations.action === 'SELL' ? 'text-blue-600' :
             'text-slate-600'
           }`}>
             {signals.recommendations.koreanAction || signals.recommendations.action}

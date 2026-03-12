@@ -329,7 +329,7 @@ export default function StockAnalysisPage({ params }: { params: Promise<{ symbol
                 </div>
                 <div className="flex items-center justify-between py-2 border-b border-slate-100">
                   <span className="text-sm text-slate-600">변동</span>
-                  <span className={`text-sm font-semibold ${stockData?.quote?.d >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className={`text-sm font-semibold ${stockData?.quote?.d >= 0 ? 'text-red-600' : 'text-blue-600'}`}>
                     {stockData?.quote?.d !== undefined 
                       ? (stockData.quote.d >= 0 ? '+' : '') + ((symbol.endsWith('.KS') || symbol.endsWith('.KQ')) ? Math.round(stockData.quote.d).toLocaleString() : stockData.quote.d.toFixed(2)) 
                       : 'N/A'}
@@ -337,7 +337,7 @@ export default function StockAnalysisPage({ params }: { params: Promise<{ symbol
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <span className="text-sm text-slate-600">% 변동</span>
-                  <span className={`text-sm font-semibold ${stockData?.quote?.dp >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className={`text-sm font-semibold ${stockData?.quote?.dp >= 0 ? 'text-red-600' : 'text-blue-600'}`}>
                     {stockData?.quote?.dp !== undefined ? (stockData.quote.dp >= 0 ? '+' : '') + stockData.quote.dp.toFixed(2) + '%' : 'N/A'}
                   </span>
                 </div>

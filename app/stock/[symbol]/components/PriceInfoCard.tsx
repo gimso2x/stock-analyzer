@@ -30,10 +30,10 @@ export default function PriceInfoCard({ quote, companyInfo }: PriceInfoCardProps
           <p className="text-slate-600">{companyInfo?.finnhubIndustry || 'N/A'}</p>
         </div>
         <div className="flex items-center gap-2 mt-4 sm:mt-0">
-          <span className={`text-3xl font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+          <span className={`text-3xl font-bold ${isPositive ? 'text-red-600' : 'text-blue-600'}`}>
             {formatPrice(quote.c)}
           </span>
-          <div className={`flex flex-col items-end ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`flex flex-col items-end ${isPositive ? 'text-red-600' : 'text-blue-600'}`}>
             <div className="flex items-center gap-1 text-sm font-medium">
               {isPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
               <span>{isPositive ? '+' : ''}{isKRW ? Math.round(change).toLocaleString() : change.toFixed(2)}</span>

@@ -30,12 +30,12 @@ export default function IndicatorCard({ title, value, description, format, symbo
 
     if (title.includes('RSI')) {
       if (value > 70) return { icon: TrendingUp, color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200', status: '과매수' };
-      if (value < 30) return { icon: TrendingDown, color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200', status: '과매도' };
+      if (value < 30) return { icon: TrendingDown, color: 'text-blue-600', bgColor: 'bg-blue-50', borderColor: 'border-blue-200', status: '과매도' };
     }
 
     if (title.includes('Stochastic')) {
       if (value > 80) return { icon: TrendingUp, color: 'text-red-600', bgColor: 'bg-red-50', borderColor: 'border-red-200', status: '과매수' };
-      if (value < 20) return { icon: TrendingDown, color: 'text-green-600', bgColor: 'bg-green-50', borderColor: 'border-green-200', status: '과매도' };
+      if (value < 20) return { icon: TrendingDown, color: 'text-blue-600', bgColor: 'bg-blue-50', borderColor: 'border-blue-200', status: '과매도' };
     }
 
     return { icon: Minus, color: 'text-slate-600', bgColor: 'bg-slate-50', borderColor: 'border-slate-200', status: '중립' };
