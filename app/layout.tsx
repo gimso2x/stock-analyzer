@@ -18,13 +18,9 @@ export const metadata: Metadata = {
   title: "주식 분석 - 쉬운 투자 분석 도구",
   description: "한국 및 미국 주식에 대한 실시간 기술적 분석, 트레이딩 신호, AI 기반 추천을 제공합니다.",
   icons: {
-    icon: [
-      { url: '/favicon.ico' },
-      { url: '/icon.png' },
-    ],
-    apple: [
-      { url: '/icon.png' },
-    ],
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/icon.png',
   },
 };
 
