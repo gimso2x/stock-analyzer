@@ -94,11 +94,55 @@ def get_stock_data(symbol, period='3mo'):
             'finnhubIndustry': info.get('sector', 'Technology'),
         }
 
+        # Calculate technical indicators using pandas
+        df = pd.DataFrame(candle)
+        
+        # 1. SMA
+        df['sma20'] = df['c'].rolling(window=20).mean()
+        df['sma50'] = df['c'].rolling(window=50).mean()
+        df['sma200'] = df['c'].rolling(window=200).mean()
+        
+        # 2. RSI (14)
+        delta = df['c'].diff()
+        gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+        loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+        rs = gain / loss
+        df['rsi14'] = 100 - (100 / (1 + rs))
+        
+        # 3. MACD
+        exp1 = df['c'].ewm(span=12, adjust=False).mean()
+        exp2 = df['c'].ewm(span=26, adjust=False).mean()
+        df['macd'] = exp1 - exp2
+        df['macdSignal'] = df['macd'].ewm(span=9, adjust=False).mean()
+        df['macdHistogram'] = df['macd'] - df['macdSignal']
+        
+        # 4. Bollinger Bands
+        df['bollingerMiddle'] = df['c'].rolling(window=20).mean()
+        df['bollingerStd'] = df['c'].rolling(window=20).std()
+        df['bollingerUpper'] = df['bollingerMiddle'] + (df['bollingerStd'] * 2)
+        df['bollingerLower'] = df['bollingerMiddle'] - (df['bollingerStd'] * 2)
+
+        # Get latest indicators for summary
+        latest_idx = -1
+        indicators = {
+            'rsi14': float(df['rsi14'].iloc[latest_idx]) if not pd.isna(df['rsi14'].iloc[latest_idx]) else None,
+            'macd': float(df['macd'].iloc[latest_idx]) if not pd.isna(df['macd'].iloc[latest_idx]) else None,
+            'macdSignal': float(df['macdSignal'].iloc[latest_idx]) if not pd.isna(df['macdSignal'].iloc[latest_idx]) else None,
+            'macdHistogram': float(df['macdHistogram'].iloc[latest_idx]) if not pd.isna(df['macdHistogram'].iloc[latest_idx]) else None,
+            'sma20': float(df['sma20'].iloc[latest_idx]) if not pd.isna(df['sma20'].iloc[latest_idx]) else None,
+            'sma50': float(df['sma50'].iloc[latest_idx]) if not pd.isna(df['sma50'].iloc[latest_idx]) else None,
+            'sma200': float(df['sma200'].iloc[latest_idx]) if not pd.isna(df['sma200'].iloc[latest_idx]) else None,
+            'bollingerUpper': float(df['bollingerUpper'].iloc[latest_idx]) if not pd.isna(df['bollingerUpper'].iloc[latest_idx]) else None,
+            'bollingerMiddle': float(df['bollingerMiddle'].iloc[latest_idx]) if not pd.isna(df['bollingerMiddle'].iloc[latest_idx]) else None,
+            'bollingerLower': float(df['bollingerLower'].iloc[latest_idx]) if not pd.isna(df['bollingerLower'].iloc[latest_idx]) else None,
+        }
+
         return {
             'quote': quote, 
             'candle': candle, 
             'company_info': company_info,
-            'analysis': analysis
+            'analysis': analysis,
+            'indicators': indicators
         }
 
     except Exception as e:
@@ -134,17 +178,25 @@ def get_ai_report(symbol):
         quote = data['quote']
         company = data['company_info']
         
-        # 프롬프트 구성
+        indicators = data.get('indicators', {})
+        
+        # 프롬프트 구성 (지표 데이터 포함 보완)
         prompt = f"""
         당신은 전문 주식 분석가입니다. 다음 주식 데이터를 바탕으로 기술적 분석 리포트를 한국어로 작성해주세요.
         마크다운 형식을 사용하고, 투자자에게 도움이 될 만한 인사이트를 포함해주세요.
         
         - 종목: {company['name']} ({symbol})
-        - 현재가: {quote['c']}
-        - 변동: {quote['d']} ({quote['dp']}%)
-        - 주요 지표: RSI {data.get('indicators', {}).get('rsi14', 'N/A')}, MACD {data.get('indicators', {}).get('macd', 'N/A')}
+        - 현재가: ${quote['c']}
+        - 변동: {quote['d']:.2f} ({quote['dp']:.2f}%)
+        - 주요 지표: 
+          - RSI(14): {indicators.get('rsi14', 'N/A')}
+          - MACD: {indicators.get('macd', 'N/A')}
+          - MACD Signal: {indicators.get('macdSignal', 'N/A')}
+          - SMA20: {indicators.get('sma20', 'N/A')}
+          - SMA50: {indicators.get('sma50', 'N/A')}
         
         리포트에는 '기술적 요약', '투자 심리', '단기 전망' 섹션을 포함해주세요.
+        지표 값을 구체적으로 인용하여 분석해주세요.
         """
 
         response = client.chat.completions.create(

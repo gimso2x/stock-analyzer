@@ -1,7 +1,11 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/ai-report/(.*)",
+      "destination": "/api/ai-report/$1"
+    },
+    {
+      "source": "/api/(?!ai-report)(.*)",
       "destination": "/api/index.py"
     }
   ]
