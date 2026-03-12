@@ -1,4 +1,5 @@
 import { useQuery } from '@/lib/queryClient';
+import { keepPreviousData } from '@tanstack/react-query';
 
 export async function fetchStockData(symbol: string, period: string = '3mo') {
   const response = await fetch(`/api/stock/${symbol}?period=${period}`);
@@ -16,6 +17,7 @@ export function useStockData(symbol: string, period: string = '3mo') {
     queryFn: () => fetchStockData(symbol, period),
     enabled: !!symbol,
     refetchOnWindowFocus: false,
+    placeholderData: keepPreviousData,
   });
 }
 

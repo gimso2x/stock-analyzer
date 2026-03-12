@@ -10,6 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { RefreshCw } from 'lucide-react';
 import type { StockCandle } from '@/lib/stock-types';
 
 interface DataPoint {
@@ -23,10 +24,11 @@ type Period = '1M' | '3M' | '6M' | '1Y' | 'ALL';
 interface LineChartProps {
   candle: StockCandle;
   symbol: string;
+  isFetching?: boolean;
   onPeriodChange?: (label: string) => void;
 }
 
-export default function LineChart({ candle, symbol, onPeriodChange }: LineChartProps) {
+export default function LineChart({ candle, symbol, isFetching, onPeriodChange }: LineChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('ALL');
   const isKRW = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
@@ -90,59 +92,66 @@ export default function LineChart({ candle, symbol, onPeriodChange }: LineChartP
         ))}
       </div>
 
-      <div className="h-[320px] sm:h-[360px] w-full mt-2">
-        <ResponsiveContainer width="100%" height="100%">
-          <RechartsLineChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 40 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-            <XAxis
-              dataKey="name"
-              stroke="#94a3b8"
-              fontSize={10}
-              tickLine={false}
-              axisLine={false}
-              dy={15}
-              height={50}
-              interval="preserveStartEnd"
-              minTickGap={30}
-            />
-            <YAxis
-              domain={[minValue - paddingValue, maxValue + paddingValue]}
-              stroke="#94a3b8"
-              fontSize={10}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(value) => isKRW ? `${Math.round(value / 1000)}k` : `$${value.toFixed(0)}`}
-              width={60}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: '#ffffff',
-                border: 'none',
-                borderRadius: '12px',
-                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                padding: '12px'
-              }}
-              itemStyle={{ color: '#0f172a', fontSize: '12px', fontWeight: 'bold' }}
-              labelStyle={{ color: '#64748b', fontSize: '10px', marginBottom: '4px' }}
-              formatter={(value: any) => [formatPrice(Number(value)), '가격']}
-              labelFormatter={(label: any) => String(label)}
-            />
-            <Line
-              type="monotone"
-              dataKey="price"
-              stroke="#059669"
-              strokeWidth={2.5}
-              dot={false}
-              activeDot={{
-                r: 5,
-                fill: '#059669',
-                stroke: '#ffffff',
-                strokeWidth: 2,
-              }}
-              animationDuration={1000}
-            />
-          </RechartsLineChart>
-        </ResponsiveContainer>
+      <div className="h-[320px] sm:h-[360px] w-full mt-2 relative">
+        {isFetching && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/30 backdrop-blur-[1px] transition-all duration-300 rounded-xl">
+            <RefreshCw className="w-8 h-8 text-emerald-600 animate-spin" />
+          </div>
+        )}
+        <div className={`w-full h-full transition-opacity duration-300 ${isFetching ? 'opacity-40' : 'opacity-100'}`}>
+          <ResponsiveContainer width="100%" height="100%">
+            <RechartsLineChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 40 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis
+                dataKey="name"
+                stroke="#94a3b8"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+                dy={15}
+                height={50}
+                interval="preserveStartEnd"
+                minTickGap={30}
+              />
+              <YAxis
+                domain={[minValue - paddingValue, maxValue + paddingValue]}
+                stroke="#94a3b8"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(value) => isKRW ? `${Math.round(value / 1000)}k` : `$${value.toFixed(0)}`}
+                width={60}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#ffffff',
+                  border: 'none',
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                  padding: '12px'
+                }}
+                itemStyle={{ color: '#0f172a', fontSize: '12px', fontWeight: 'bold' }}
+                labelStyle={{ color: '#64748b', fontSize: '10px', marginBottom: '4px' }}
+                formatter={(value: any) => [formatPrice(Number(value)), '가격']}
+                labelFormatter={(label: any) => String(label)}
+              />
+              <Line
+                type="monotone"
+                dataKey="price"
+                stroke="#059669"
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{
+                  r: 5,
+                  fill: '#059669',
+                  stroke: '#ffffff',
+                  strokeWidth: 2,
+                }}
+                animationDuration={1000}
+              />
+            </RechartsLineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

@@ -117,7 +117,7 @@ export default function StockAnalysisPage({ params }: { params: Promise<{ symbol
   const [isIndicatorsExpanded, setIsIndicatorsExpanded] = useState(true);
   const [chartPeriod, setChartPeriod] = useState('3mo');
 
-  const { data: stockData, isLoading, isError, error } = useStockData(symbol, chartPeriod);
+  const { data: stockData, isLoading, isError, error, isFetching } = useStockData(symbol, chartPeriod);
 
   const indicators = stockData?.candle ? calculateAllIndicators(stockData.candle) : null;
   const latestIndicators = indicators ? getLatestIndicators(indicators) : null;
@@ -128,7 +128,7 @@ export default function StockAnalysisPage({ params }: { params: Promise<{ symbol
     ? generateTradingSignals(latestIndicators, stockData.quote.c)
     : null;
 
-  if (isLoading) {
+  if (isLoading && !stockData) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 flex items-center justify-center">
         <div className="text-center">
@@ -193,6 +193,7 @@ export default function StockAnalysisPage({ params }: { params: Promise<{ symbol
               <LineChart 
                 candle={stockData.candle} 
                 symbol={symbol} 
+                isFetching={isFetching}
                 onPeriodChange={(period) => {
                   const periodMap: Record<string, string> = {
                     '1M': '1mo',
