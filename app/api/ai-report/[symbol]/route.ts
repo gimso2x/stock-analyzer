@@ -15,7 +15,13 @@ export async function GET(
     const symbolUpper = symbol.toUpperCase();
 
     // 1. Fetch data directly from Flask backend to avoid internal fetch issues on Vercel
-    const FLASK_API_URL = process.env.NEXT_PUBLIC_FLASK_API_URL || 'http://localhost:5000';
+    const getBaseUrl = () => {
+      if (process.env.NEXT_PUBLIC_FLASK_API_URL) return process.env.NEXT_PUBLIC_FLASK_API_URL;
+      if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+      return 'http://localhost:5000';
+    };
+    
+    const FLASK_API_URL = getBaseUrl();
     const dataResponse = await fetch(`${FLASK_API_URL}/api/stock/${symbolUpper}?period=3mo`);
     
     if (!dataResponse.ok) {
