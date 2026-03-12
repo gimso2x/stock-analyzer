@@ -27,7 +27,14 @@ export async function GET(
     }
 
     const data = await response.json();
-    const { quote, candle, company_info: companyInfo, analysis } = data;
+    const { 
+      quote, 
+      candle, 
+      company_info: companyInfo, 
+      analysis,
+      support_resistance,
+      box_range
+    } = data;
 
     const allIndicators = calculateAllIndicators(candle);
     const latestIndicators = getLatestIndicators(allIndicators);
@@ -38,6 +45,8 @@ export async function GET(
       indicators: latestIndicators,
       companyInfo,
       analysis,
+      support_resistance,
+      box_range,
     });
   } catch (error) {
     console.error('Error fetching stock data:', error);

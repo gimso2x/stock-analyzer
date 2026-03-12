@@ -62,6 +62,16 @@ export interface StockData {
   candle: StockCandle;
   company_info: CompanyInfo;
   analysis?: StockAnalysisData;
+  support_resistance?: {
+    supports: number[];
+    resistances: number[];
+  };
+  box_range?: {
+    low: number;
+    high: number;
+    start_time: number;
+    end_time: number;
+  } | null;
 }
 
 export async function fetchStockQuote(symbol: string): Promise<StockQuote> {

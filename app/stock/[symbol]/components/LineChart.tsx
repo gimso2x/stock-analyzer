@@ -9,6 +9,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  ReferenceLine,
+  ReferenceArea,
 } from 'recharts';
 import { RefreshCw } from 'lucide-react';
 import type { StockCandle } from '@/lib/stock-types';
@@ -17,6 +19,7 @@ interface DataPoint {
   name: string;
   price: number;
   date: string;
+  timestamp: number;
 }
 
 type Period = '1M' | '3M' | '6M' | '1Y' | 'ALL';
@@ -26,9 +29,26 @@ interface LineChartProps {
   symbol: string;
   isFetching?: boolean;
   onPeriodChange?: (label: string) => void;
+  supportResistance?: {
+    supports: number[];
+    resistances: number[];
+  };
+  boxRange?: {
+    low: number;
+    high: number;
+    start_time: number;
+    end_time: number;
+  } | null;
 }
 
-export default function LineChart({ candle, symbol, isFetching, onPeriodChange }: LineChartProps) {
+export default function LineChart({ 
+  candle, 
+  symbol, 
+  isFetching, 
+  onPeriodChange,
+  supportResistance,
+  boxRange
+}: LineChartProps) {
   const chartRef = useRef<HTMLDivElement>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<Period>('ALL');
   const isKRW = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
@@ -60,13 +80,27 @@ export default function LineChart({ candle, symbol, isFetching, onPeriodChange }
       month: 'long',
       day: 'numeric',
     }),
+    timestamp: timestamp,
   }));
 
   const data = fullData;
 
   const minValue = Math.min(...data.map((d) => d.price));
   const maxValue = Math.max(...data.map((d) => d.price));
-  const paddingValue = (maxValue - minValue) * 0.1;
+  
+  // Adjust min/max for reference items
+  let effectiveMin = minValue;
+  let effectiveMax = maxValue;
+  
+  if (supportResistance) {
+    const allSR = [...supportResistance.supports, ...supportResistance.resistances];
+    if (allSR.length > 0) {
+      effectiveMin = Math.min(effectiveMin, ...allSR);
+      effectiveMax = Math.max(effectiveMax, ...allSR);
+    }
+  }
+  
+  const paddingValue = (effectiveMax - effectiveMin) * 0.1;
 
   const formatPrice = (value: number) => {
     return isKRW 
@@ -114,7 +148,7 @@ export default function LineChart({ candle, symbol, isFetching, onPeriodChange }
                 minTickGap={30}
               />
               <YAxis
-                domain={[minValue - paddingValue, maxValue + paddingValue]}
+                domain={[effectiveMin - paddingValue, effectiveMax + paddingValue]}
                 stroke="#94a3b8"
                 fontSize={10}
                 tickLine={false}
@@ -132,9 +166,59 @@ export default function LineChart({ candle, symbol, isFetching, onPeriodChange }
                 }}
                 itemStyle={{ color: '#0f172a', fontSize: '12px', fontWeight: 'bold' }}
                 labelStyle={{ color: '#64748b', fontSize: '10px', marginBottom: '4px' }}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 formatter={(value: any) => [formatPrice(Number(value)), '가격']}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 labelFormatter={(label: any) => String(label)}
               />
+              
+              {/* Box Range Visualization */}
+              {boxRange && (
+                <ReferenceArea
+                  x1={new Date(boxRange.start_time * 1000).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
+                  x2={new Date(boxRange.end_time * 1000).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
+                  y1={boxRange.low}
+                  y2={boxRange.high}
+                  fill="#94a3b8"
+                  fillOpacity={0.15}
+                  stroke="none"
+                />
+              )}
+
+              {/* Support Lines */}
+              {supportResistance?.supports.map((s, i) => (
+                <ReferenceLine 
+                  key={`support-${i}`} 
+                  y={s} 
+                  stroke="#22c55e" 
+                  strokeWidth={2}
+                  label={{ 
+                    position: 'insideBottomRight', 
+                    value: 'SUPPORT / 지지', 
+                    fill: '#22c55e', 
+                    fontSize: 11,
+                    fontWeight: 'bold' 
+                  }} 
+                />
+              ))}
+
+              {/* Resistance Lines */}
+              {supportResistance?.resistances.map((r, i) => (
+                <ReferenceLine 
+                  key={`resistance-${i}`} 
+                  y={r} 
+                  stroke="#ef4444" 
+                  strokeWidth={2}
+                  label={{ 
+                    position: 'insideTopRight', 
+                    value: 'RESISTANCE / 저항', 
+                    fill: '#ef4444', 
+                    fontSize: 11,
+                    fontWeight: 'bold' 
+                  }} 
+                />
+              ))}
+
               <Line
                 type="monotone"
                 dataKey="price"

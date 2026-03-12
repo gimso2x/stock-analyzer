@@ -194,6 +194,8 @@ export default function StockAnalysisPage({ params }: { params: Promise<{ symbol
                 candle={stockData.candle} 
                 symbol={symbol} 
                 isFetching={isFetching}
+                supportResistance={stockData.support_resistance}
+                boxRange={stockData.box_range}
                 onPeriodChange={(period) => {
                   const periodMap: Record<string, string> = {
                     '1M': '1mo',
@@ -322,11 +324,38 @@ export default function StockAnalysisPage({ params }: { params: Promise<{ symbol
                 주요 레벨
               </h3>
               <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="text-slate-600 font-medium">지지/저항 데이터 없음</span>
+                {stockData.support_resistance?.resistances.slice().reverse().map((r: number, i: number) => (
+                  <div key={`res-item-${i}`} className="flex items-center justify-between py-1 border-b border-slate-50">
+                    <span className="text-xs font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded">저항 {stockData.support_resistance!.resistances.length - i}</span>
+                    <span className="text-sm font-semibold text-slate-700">
+                      {(symbol.endsWith('.KS') || symbol.endsWith('.KQ')) 
+                        ? `₩${Math.round(r).toLocaleString()}` 
+                        : `$${r.toFixed(2)}`}
+                    </span>
                   </div>
-                </div>
+                ))}
+                {stockData.support_resistance?.supports.map((s: number, i: number) => (
+                  <div key={`sup-item-${i}`} className="flex items-center justify-between py-1 border-b border-slate-50">
+                    <span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded">지지 {i + 1}</span>
+                    <span className="text-sm font-semibold text-slate-700">
+                      {(symbol.endsWith('.KS') || symbol.endsWith('.KQ')) 
+                        ? `₩${Math.round(s).toLocaleString()}` 
+                        : `$${s.toFixed(2)}`}
+                    </span>
+                  </div>
+                ))}
+                {!stockData.support_resistance?.supports.length && !stockData.support_resistance?.resistances.length && (
+                  <div className="text-sm text-slate-400 text-center py-4">계산된 주요 레벨이 없습니다</div>
+                )}
+                {stockData.box_range && (
+                  <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                    <p className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">탐지된 박스권</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-slate-600">상단: {(symbol.endsWith('.KS') || symbol.endsWith('.KQ')) ? `₩${Math.round(stockData.box_range.high).toLocaleString()}` : `$${stockData.box_range.high.toFixed(2)}`}</span>
+                      <span className="text-xs text-slate-600">하단: {(symbol.endsWith('.KS') || symbol.endsWith('.KQ')) ? `₩${Math.round(stockData.box_range.low).toLocaleString()}` : `$${stockData.box_range.low.toFixed(2)}`}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

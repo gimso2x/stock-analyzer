@@ -6,7 +6,6 @@ interface RangeSliderProps {
   min: number;
   max: number;
   minLabel?: string;
-  symbol?: string;
   isKRW?: boolean;
 }
 
@@ -16,7 +15,6 @@ export default function RangeSlider({
   min, 
   max, 
   minLabel, 
-  symbol = '$',
   isKRW = false
 }: RangeSliderProps) {
   // Calculate percentage position

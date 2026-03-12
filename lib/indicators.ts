@@ -1,5 +1,4 @@
 import type { StockCandle } from './stock-types';
-import dayjs from 'dayjs';
 
 /**
  * Calculate Simple Moving Average (SMA)
@@ -24,8 +23,11 @@ export function calculateSMA(prices: number[], period: number): number[] {
  * Calculate Exponential Moving Average (EMA)
  */
 export function calculateEMA(prices: number[], period: number): number[] {
-  const ema: number[] = [];
+  if (prices.length < period) {
+    return new Array(prices.length).fill(NaN);
+  }
 
+  const ema: number[] = [];
   const multiplier = 2 / (period + 1);
 
   // Start with SMA for the first EMA value
@@ -34,7 +36,7 @@ export function calculateEMA(prices: number[], period: number): number[] {
 
   // Calculate EMA for the rest
   for (let i = period; i < prices.length; i++) {
-    const currentEMA = (prices[i] - ema[i - period]) * multiplier + ema[i - period];
+    const currentEMA = (prices[i] - ema[ema.length - 1]) * multiplier + ema[ema.length - 1];
     ema.push(currentEMA);
   }
 
@@ -47,6 +49,10 @@ export function calculateEMA(prices: number[], period: number): number[] {
  */
 export function calculateRSI(prices: number[], period: number = 14): number[] {
   const rsi: number[] = [];
+  if (prices.length <= period) {
+    return new Array(prices.length).fill(NaN);
+  }
+
   let avgGain = 0;
   let avgLoss = 0;
 
@@ -106,12 +112,29 @@ export function calculateMACD(prices: number[], fastPeriod: number = 12, slowPer
 
   // Filter out NaN values for signal line calculation
   const validMacdLine = macdLine.filter((v) => !isNaN(v));
+  
+  if (validMacdLine.length < signalPeriod) {
+    return {
+      macd: macdLine,
+      signal: new Array(macdLine.length).fill(NaN),
+      histogram: new Array(macdLine.length).fill(NaN),
+    };
+  }
+
   const signalLine = calculateEMA(validMacdLine, signalPeriod);
 
   // Calculate histogram
-  const histogram: number[] = [];
-  const fullSignalLine = [...new Array(macdLine.indexOf(validMacdLine[0])).fill(NaN), ...signalLine];
+  const firstValidIdx = macdLine.findIndex(v => !isNaN(v));
+  const fullSignalLine = [
+    ...new Array(firstValidIdx === -1 ? macdLine.length : firstValidIdx).fill(NaN), 
+    ...signalLine
+  ];
 
+  // Ensure fullSignalLine matches macdLine length
+  while (fullSignalLine.length < macdLine.length) fullSignalLine.push(NaN);
+  if (fullSignalLine.length > macdLine.length) fullSignalLine.length = macdLine.length;
+
+  const histogram: number[] = [];
   for (let i = 0; i < macdLine.length; i++) {
     if (isNaN(macdLine[i]) || isNaN(fullSignalLine[i])) {
       histogram.push(NaN);
@@ -136,7 +159,7 @@ export function calculateBollingerBands(prices: number[], period: number = 20, s
   const lowerBand: number[] = [];
 
   for (let i = 0; i < prices.length; i++) {
-    if (i < period) {
+    if (i < period || isNaN(sma[i])) {
       upperBand.push(NaN);
       lowerBand.push(NaN);
       continue;
@@ -177,14 +200,30 @@ export function calculateStochastic(highs: number[], lows: number[], closes: num
     const highestHigh = Math.max(...highSlice);
     const lowestLow = Math.min(...lowSlice);
 
-    const rawK = ((closes[i] - lowestLow) / (highestHigh - lowestLow)) * 100;
-    k.push(rawK);
+    if (highestHigh === lowestLow) {
+      k.push(50);
+    } else {
+      const rawK = ((closes[i] - lowestLow) / (highestHigh - lowestLow)) * 100;
+      k.push(rawK);
+    }
   }
 
   // Calculate %D (SMA of %K)
-  const d = calculateSMA(k.filter((v) => !isNaN(v)), dPeriod);
+  const validK = k.filter((v) => !isNaN(v));
+  if (validK.length < dPeriod) {
+    return { k, d: new Array(k.length).fill(NaN) };
+  }
 
-  const fullD = [...new Array(k.indexOf(k.find((v) => !isNaN(v)) || 0)).fill(NaN), ...d];
+  const d = calculateSMA(validK, dPeriod);
+  const firstValidIdx = k.findIndex(v => !isNaN(v));
+  const fullD = [
+    ...new Array(firstValidIdx === -1 ? k.length : firstValidIdx).fill(NaN), 
+    ...d
+  ];
+
+  // Ensure fullD matches k length
+  while (fullD.length < k.length) fullD.push(NaN);
+  if (fullD.length > k.length) fullD.length = k.length;
 
   return { k, d: fullD };
 }
