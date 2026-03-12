@@ -1,15 +1,26 @@
 # Stock Analyzer
 
-A modern, real-time stock analysis web application built with Next.js, TypeScript, and TailwindCSS.
+한국 및 미국 주식을 위한 실시간 분석 웹 애플리케이션입니다. Next.js, TypeScript, TailwindCSS로 구축되었습니다.
 
 ## Features
 
-- **Real-Time Stock Data**: Fetches live market data using Finnhub API
-- **Technical Analysis**: Calculates RSI, MACD, Bollinger Bands, and more indicators
-- **Interactive Charts**: Beautiful price charts powered by Recharts
-- **Trading Signals**: AI-powered buy/sell recommendations with risk-reward ratios
-- **Support/Resistance Levels**: Automatic calculation of key price levels
-- **Modern UI**: Clean, responsive design with TailwindCSS
+- **한국 & 미국 주식 지원**: 코스피(KOSPI), 코스닥(KOSDAQ), 미국 주식 데이터 지원
+- **실시간 시장 데이터**: Finnhub API를 통한 실시간 주식 데이터
+- **기술적 분석**: RSI, MACD, 볼린저 밴드 등 다양한 지표 계산
+- **인터랙티브 차트**: Recharts를 활용한 아름다운 가격 차트
+- **트레이딩 신호**: 리스크/보상 비율이 포함된 AI 기반 매수/매도 추천
+- **지지선/저항선**: 자동 주요 가격 레벨 계산
+- **모던 UI**: TailwindCSS를 활용한 깔끔하고 반응형 디자인
+
+## 🇰🇷 한국 주식 지원
+
+한국 주식 종목코드 형식:
+- **KOSPI**: `005930.KS` (삼성전자)
+- **KOSDAQ**: `247540.KQ` (코스닥 종목)
+
+인기 종목 제공:
+- 시가총액 상위 10개 한국 종목 포함
+- 클릭 한 번으로 바로 분석 가능
 
 ## Tech Stack
 
@@ -174,4 +185,4 @@ pnpm dev -p 3001
 
 ## Disclaimer
 
-This application is for informational purposes only and does not constitute financial advice. Always do your own research and consult with a financial advisor before making investment decisions. Past performance is not indicative of future results.
+이 애플리케이션은 정보 제공 목적으로만 제공되며, 투자 조언을 구성하지 않습니다. 투자 결정을 내리기 전에 직접 조사를 수행하고 금융 고문과 상담하세요. 과거의 성과가 미래의 결과를 보장하지 않습니다.

@@ -7,13 +7,20 @@ interface IndicatorCardProps {
   value: number;
   description: string;
   format: 'currency' | 'number';
-  max?: number;
+  symbol?: string;
 }
 
-export default function IndicatorCard({ title, value, description, format, max }: IndicatorCardProps) {
+export default function IndicatorCard({ title, value, description, format, symbol }: IndicatorCardProps) {
+  const isKRW = symbol?.endsWith('.KS') || symbol?.endsWith('.KQ');
+  const currencySymbol = isKRW ? '₩' : '$';
+
   const formatValue = (val: number) => {
     if (isNaN(val)) return 'N/A';
-    if (format === 'currency') return `$${val.toFixed(2)}`;
+    if (format === 'currency') {
+      return isKRW 
+        ? `${currencySymbol}${Math.round(val).toLocaleString()}` 
+        : `${currencySymbol}${val.toFixed(2)}`;
+    }
     if (format === 'number') return val.toFixed(2);
     return val.toString();
   };
@@ -40,10 +47,10 @@ export default function IndicatorCard({ title, value, description, format, max }
     <div className={`p-4 rounded-xl border ${status?.bgColor || 'bg-slate-50'} ${status?.borderColor || 'border-slate-200'} hover:shadow-md transition-shadow`}>
       <div className="flex items-start justify-between mb-2">
         <div className="flex-1">
-          <h3 className="text-sm font-bold text-slate-900">{title}</h3>
-          <p className="text-xs text-slate-500">{description}</p>
+          <h3 className="text-xs sm:text-sm font-bold text-slate-900">{title}</h3>
+          <p className="text-[10px] sm:text-xs text-slate-500">{description}</p>
         </div>
-        {status && (
+        {status && status.status !== '중립' && (
           <div className={`p-1.5 rounded-lg ${status.bgColor}`}>
             <status.icon className={`w-4 h-4 ${status.color}`} />
           </div>
@@ -51,7 +58,7 @@ export default function IndicatorCard({ title, value, description, format, max }
       </div>
       <div className="flex items-baseline gap-2">
         <span className="text-2xl font-bold text-slate-900">{formatValue(value)}</span>
-        {status && (
+        {status && status.status !== '중립' && (
           <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${status.bgColor} ${status.color}`}>
             {status.status}
           </span>

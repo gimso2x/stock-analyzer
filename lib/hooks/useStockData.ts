@@ -1,5 +1,4 @@
 import { useQuery } from '@/lib/queryClient';
-import type { StockCandle, StockQuote, CompanyInfo } from '@/lib/finnhub';
 
 export async function fetchStockData(symbol: string) {
   const response = await fetch(`/api/stock/${symbol}`);

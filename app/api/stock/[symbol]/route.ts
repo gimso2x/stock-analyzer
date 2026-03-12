@@ -1,6 +1,5 @@
-import { fetchStockQuote, fetchStockCandles, fetchCompanyInfo } from '@/lib/finnhub';
 import { calculateAllIndicators, getLatestIndicators } from '@/lib/indicators';
-import type { StockCandle, StockQuote, CompanyInfo } from '@/lib/finnhub';
+import type { StockCandle, StockQuote, CompanyInfo } from '@/lib/stock-types';
 
 export interface IndicatorsResponse {
   quote: StockQuote;
@@ -17,11 +16,16 @@ export async function GET(
     const { symbol } = await params;
     const symbolUpper = symbol.toUpperCase();
 
-    const [quote, candle, companyInfo] = await Promise.all([
-      fetchStockQuote(symbolUpper),
-      fetchStockCandles(symbolUpper, 'D'),
-      fetchCompanyInfo(symbolUpper),
-    ]);
+    // Fetch everything from Flask backend in one go
+    const FLASK_API_URL = process.env.NEXT_PUBLIC_FLASK_API_URL || 'http://localhost:5000';
+    const response = await fetch(`${FLASK_API_URL}/api/stock/${symbolUpper}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch from backend: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const { quote, candle, company_info: companyInfo, analysis } = data;
 
     const allIndicators = calculateAllIndicators(candle);
     const latestIndicators = getLatestIndicators(allIndicators);
@@ -31,7 +35,8 @@ export async function GET(
       candle,
       indicators: latestIndicators,
       companyInfo,
-    } satisfies IndicatorsResponse);
+      analysis,
+    });
   } catch (error) {
     console.error('Error fetching stock data:', error);
 

@@ -35,6 +35,35 @@ export interface CompanyInfo {
   finnhubIndustry: string;
 }
 
+export interface FinancialMetrics {
+  forwardPE: number | null;
+  trailingPE: number | null;
+  priceToBook: number | null;
+  revenueGrowth: number | null;
+  profitMargins: number | null;
+  debtToEquity: number | null;
+  returnOnEquity: number | null;
+  operatingMargins: number | null;
+}
+
+export interface StockAnalysisData {
+  targetMeanPrice: number | null;
+  targetHighPrice: number | null;
+  targetLowPrice: number | null;
+  numberOfAnalystOpinions: number | null;
+  fiftyTwoWeekLow: number | null;
+  fiftyTwoWeekHigh: number | null;
+  currentPrice: number;
+  financialMetrics: FinancialMetrics;
+}
+
+export interface StockData {
+  quote: StockQuote;
+  candle: StockCandle;
+  company_info: CompanyInfo;
+  analysis?: StockAnalysisData;
+}
+
 export async function fetchStockQuote(symbol: string): Promise<StockQuote> {
   const url = `${FLASK_API_URL}/api/stock/${symbol}`;
 
@@ -54,8 +83,7 @@ export async function fetchStockQuote(symbol: string): Promise<StockQuote> {
 }
 
 export async function fetchStockCandles(
-  symbol: string,
-  resolution: '1' | '5' | '15' | '30' | '60' | 'D' | 'W' | 'M' = 'D'
+  symbol: string
 ): Promise<StockCandle> {
   const url = `${FLASK_API_URL}/api/stock/${symbol}`;
 

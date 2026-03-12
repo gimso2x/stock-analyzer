@@ -57,6 +57,28 @@ def get_stock_data(symbol):
 
         # Get company info
         info = ticker.info
+        
+        # Fair Value & Financial Health Data
+        analysis = {
+            'targetMeanPrice': info.get('targetMeanPrice'),
+            'targetHighPrice': info.get('targetHighPrice'),
+            'targetLowPrice': info.get('targetLowPrice'),
+            'numberOfAnalystOpinions': info.get('numberOfAnalystOpinions'),
+            'fiftyTwoWeekLow': info.get('fiftyTwoWeekLow'),
+            'fiftyTwoWeekHigh': info.get('fiftyTwoWeekHigh'),
+            'currentPrice': info.get('currentPrice', c),
+            'financialMetrics': {
+                'forwardPE': info.get('forwardPE'),
+                'trailingPE': info.get('trailingPE'),
+                'priceToBook': info.get('priceToBook'),
+                'revenueGrowth': info.get('revenueGrowth'),
+                'profitMargins': info.get('profitMargins'),
+                'debtToEquity': info.get('debtToEquity'),
+                'returnOnEquity': info.get('returnOnEquity'),
+                'operatingMargins': info.get('operatingMargins'),
+            }
+        }
+
         company_info = {
             'country': info.get('country', 'US'),
             'currency': info.get('currency', 'USD'),
@@ -72,7 +94,12 @@ def get_stock_data(symbol):
             'finnhubIndustry': info.get('sector', 'Technology'),
         }
 
-        return {'quote': quote, 'candle': candle, 'company_info': company_info}
+        return {
+            'quote': quote, 
+            'candle': candle, 
+            'company_info': company_info,
+            'analysis': analysis
+        }
 
     except Exception as e:
         print(f"Error fetching data for {symbol}: {e}")
@@ -85,9 +112,60 @@ def get_stock(symbol):
         return jsonify(data)
     return jsonify({'error': f'Failed to fetch data for {symbol}'}), 404
 
+import os
+from openai import OpenAI
+
+# NVIDIA NIM 설정
+NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
+client = OpenAI(
+    base_url="https://integrate.api.nvidia.com/v1",
+    api_key=NVIDIA_API_KEY
+)
+
+@app.route('/api/ai-report/<symbol>', methods=['GET'])
+def get_ai_report(symbol):
+    try:
+        # 데이터 수집 (기존 함수 재사용)
+        data = get_stock_data(symbol)
+        if not data:
+            return jsonify({'error': 'Failed to fetch data for AI report'}), 404
+
+        quote = data['quote']
+        company = data['company_info']
+        
+        # 프롬프트 구성
+        prompt = f"""
+        당신은 전문 주식 분석가입니다. 다음 주식 데이터를 바탕으로 기술적 분석 리포트를 한국어로 작성해주세요.
+        마크다운 형식을 사용하고, 투자자에게 도움이 될 만한 인사이트를 포함해주세요.
+        
+        - 종목: {company['name']} ({symbol})
+        - 현재가: {quote['c']}
+        - 변동: {quote['d']} ({quote['dp']}%)
+        - 주요 지표: RSI {data.get('indicators', {}).get('rsi14', 'N/A')}, MACD {data.get('indicators', {}).get('macd', 'N/A')}
+        
+        리포트에는 '기술적 요약', '투자 심리', '단기 전망' 섹션을 포함해주세요.
+        """
+
+        response = client.chat.completions.create(
+            model="meta/llama-3.1-405b-instruct",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.2,
+            max_tokens=1024
+        )
+
+        return jsonify({
+            'symbol': symbol,
+            'report': response.choices[0].message.content
+        })
+
+    except Exception as e:
+        print(f"Error generating AI report for {symbol}: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({'status': 'ok', 'message': 'Flask API is running'})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)

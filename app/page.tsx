@@ -18,6 +18,16 @@ export default function Home() {
   };
 
   const popularStocks = [
+    { symbol: '005930.KS', name: '삼성전자', sector: 'Semiconductors' },
+    { symbol: '000660.KS', name: 'SK하이닉스', sector: 'Semiconductors' },
+    { symbol: '005380.KS', name: '현대차', sector: 'Automotive' },
+    { symbol: '005935.KS', name: '삼성전자우', sector: 'Semiconductors' },
+    { symbol: '373220.KS', name: 'LG에너지솔루션', sector: 'Battery' },
+    { symbol: '207940.KS', name: '삼성바이오로직스', sector: 'Biotechnology' },
+    { symbol: '012450.KS', name: '한화에어로스페이스', sector: 'Aerospace & Defense' },
+    { symbol: '402340.KS', name: 'SK스퀘어', sector: 'Holding' },
+    { symbol: '000270.KS', name: '기아', sector: 'Automotive' },
+    { symbol: '034020.KS', name: '두산에너빌리티', sector: 'Energy' },
     { symbol: 'NVDA', name: 'NVIDIA Corporation', sector: 'Semiconductors' },
     { symbol: 'AAPL', name: 'Apple Inc.', sector: 'Technology' },
     { symbol: 'TSLA', name: 'Tesla, Inc.', sector: 'Automotive' },
@@ -87,20 +97,38 @@ export default function Home() {
             </div>
           </form>
 
-          <div className="mt-6">
-            <p className="text-sm text-slate-500 text-center mb-4">인기 종목:</p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {popularStocks.map((stock) => (
-                <button
-                  key={stock.symbol}
-                  onClick={() => router.push(`/stock/${stock.symbol}`)}
-                  className="inline-flex items-center px-4 py-2 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 hover:border-emerald-300 hover:text-emerald-700 hover:bg-emerald-50/50 transition-all duration-200"
-                >
-                  <span className="font-semibold">{stock.symbol}</span>
-                  <span className="text-slate-400 mx-2">•</span>
-                  <span className="text-slate-500 truncate max-w-[120px]">{stock.name}</span>
-                </button>
-              ))}
+          <div className="mt-6 space-y-6">
+            <div>
+              <p className="text-sm text-slate-500 text-center mb-4 font-medium">🇰🇷 한국 주식</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {popularStocks.filter((s) => s.symbol.endsWith('.KS')).map((stock) => (
+                  <button
+                    key={stock.symbol}
+                    onClick={() => router.push(`/stock/${stock.symbol}`)}
+                    className="inline-flex items-center px-4 py-2 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 hover:border-emerald-300 hover:text-emerald-700 hover:bg-emerald-50/50 transition-all duration-200"
+                  >
+                    <span className="font-semibold">{stock.name}</span>
+                    <span className="text-slate-400 mx-2">•</span>
+                    <span className="text-slate-500">{stock.symbol}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="text-sm text-slate-500 text-center mb-4 font-medium">🇺🇸 미국 주식</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                {popularStocks.filter((s) => !s.symbol.endsWith('.KS')).map((stock) => (
+                  <button
+                    key={stock.symbol}
+                    onClick={() => router.push(`/stock/${stock.symbol}`)}
+                    className="inline-flex items-center px-4 py-2 bg-white border border-slate-200 rounded-full text-sm font-medium text-slate-700 hover:border-emerald-300 hover:text-emerald-700 hover:bg-emerald-50/50 transition-all duration-200"
+                  >
+                    <span className="font-semibold">{stock.symbol}</span>
+                    <span className="text-slate-400 mx-2">•</span>
+                    <span className="text-slate-500 truncate max-w-[120px]">{stock.name}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -118,26 +146,6 @@ export default function Home() {
               <p className="text-sm text-slate-600">{feature.description}</p>
             </div>
           ))}
-        </div>
-
-        <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-3xl p-8 lg:p-12 text-white mb-16 shadow-xl shadow-emerald-900/20">
-          <div className="max-w-2xl">
-            <h2 className="text-3xl font-bold mb-4">더 쉽게 스마트한 트레이딩</h2>
-            <p className="text-emerald-100 mb-6 text-lg">
-              실시간 시장 데이터와 고급 기술 분석 알고리즘을 기반으로 제공됩니다.
-              자신감을 가지고 정보에 기반한 의사결을 내리세요.
-            </p>
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <div className="text-4xl font-bold mb-1">200+</div>
-                <div className="text-emerald-200 text-sm">지원 시장</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold mb-1">100만+</div>
-                <div className="text-emerald-200 text-sm">데이터 포인트</div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

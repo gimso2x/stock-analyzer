@@ -11,6 +11,7 @@ interface TradingSignalCardProps {
     stochastic: string;
     recommendations: {
       action: 'BUY' | 'SELL' | 'HOLD';
+      koreanAction?: string;
       confidence: string;
       timeframe: string;
     };
@@ -18,75 +19,62 @@ interface TradingSignalCardProps {
 }
 
 export default function TradingSignalCard({ signals }: TradingSignalCardProps) {
-  const getTrendIcon = () => {
-    switch (signals.trend) {
-      case 'STRONG BUY':
-      case 'BUY':
-        return TrendingUp;
-      case 'STRONG SELL':
-      case 'SELL':
-        return TrendingDown;
+  const getTrendIcon = (trend: string) => {
+    switch (trend) {
+      case '강력 매수':
+      case '매수':
+        return <TrendingUp className="w-8 h-8 opacity-80" />;
+      case '강력 매도':
+      case '매도':
+        return <TrendingDown className="w-8 h-8 opacity-80" />;
       default:
-        return Minus;
+        return <Minus className="w-8 h-8 opacity-80" />;
     }
   };
 
-  const getTrendColor = () => {
-    switch (signals.trend) {
-      case 'STRONG BUY':
+  const getTrendColor = (trend: string) => {
+    switch (trend) {
+      case '강력 매수':
         return 'bg-green-600 text-white';
-      case 'BUY':
+      case '매수':
         return 'bg-green-500 text-white';
-      case 'STRONG SELL':
+      case '강력 매도':
         return 'bg-red-600 text-white';
-      case 'SELL':
+      case '매도':
         return 'bg-red-500 text-white';
       default:
         return 'bg-slate-600 text-white';
     }
   };
 
-  const getSignalIcon = (signal: string) => {
-    switch (signal) {
-      case 'OVERBOUGHT':
-      case 'ABOVE_UPPER':
-        return TrendingUp;
-      case 'OVERSOLD':
-      case 'BELOW_LOWER':
-        return TrendingDown;
-      default:
-        return Minus;
-    }
-  };
-
   const getSignalColor = (signal: string) => {
     switch (signal) {
-      case 'OVERBOUGHT':
-      case 'ABOVE_UPPER':
+      case '과매수':
+      case '상단 돌파':
+      case '강세':
         return 'text-red-600 bg-red-50 border-red-200';
-      case 'OVERSOLD':
-      case 'BELOW_LOWER':
+      case '과매도':
+      case '하단 이탈':
+      case '약세':
         return 'text-green-600 bg-green-50 border-green-200';
       default:
         return 'text-slate-600 bg-slate-50 border-slate-200';
     }
   };
 
-  const TrendIcon = getTrendIcon();
-
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-lg">
-      <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center">
+    <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-lg">
+      <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-4 flex items-center">
         <Activity className="w-5 h-5 mr-2 text-emerald-600" />
         트레이딩 신호
       </h3>
 
-      <div className={`flex items-center justify-between p-4 rounded-xl mb-4 ${getTrendColor()}`}>
+      <div className={`flex items-center justify-between p-3 sm:p-4 rounded-xl mb-4 ${getTrendColor(signals.trend)}`}>
         <div>
-          <div className="text-sm opacity-90">전체 추세</div>
-          <div className="text-xl font-bold">{signals.trend}</div>
+          <div className="text-xs sm:text-sm opacity-90">전체 추세</div>
+          <div className="text-lg sm:text-xl font-bold">{signals.trend}</div>
         </div>
-        <TrendIcon className="w-8 h-8 opacity-80" />
+        {getTrendIcon(signals.trend)}
       </div>
 
       <div className="space-y-3">
@@ -119,7 +107,7 @@ export default function TradingSignalCard({ signals }: TradingSignalCardProps) {
             signals.recommendations.action === 'SELL' ? 'text-red-600' :
             'text-slate-600'
           }`}>
-            {signals.recommendations.action}
+            {signals.recommendations.koreanAction || signals.recommendations.action}
             {signals.recommendations.confidence && (
               <span className="text-xs text-slate-500 ml-1">({signals.recommendations.confidence})</span>
             )}

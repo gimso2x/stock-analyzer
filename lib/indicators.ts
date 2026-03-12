@@ -1,4 +1,4 @@
-import type { StockCandle } from './finnhub';
+import type { StockCandle } from './stock-types';
 import dayjs from 'dayjs';
 
 /**
@@ -47,16 +47,14 @@ export function calculateEMA(prices: number[], period: number): number[] {
  */
 export function calculateRSI(prices: number[], period: number = 14): number[] {
   const rsi: number[] = [];
+  let avgGain = 0;
+  let avgLoss = 0;
 
   for (let i = 0; i < prices.length; i++) {
     if (i < period) {
       rsi.push(NaN);
       continue;
     }
-
-    // Calculate gains and losses
-    let avgGain = 0;
-    let avgLoss = 0;
 
     // First average
     if (i === period) {
@@ -227,10 +225,27 @@ export function calculateAllIndicators(candle: StockCandle) {
   };
 }
 
+export interface LatestIndicators {
+  sma20: number;
+  sma50: number;
+  sma200: number;
+  ema12: number;
+  ema26: number;
+  rsi14: number;
+  macd: number;
+  macdSignal: number;
+  macdHistogram: number;
+  bollingerUpper: number;
+  bollingerMiddle: number;
+  bollingerLower: number;
+  stochasticK: number;
+  stochasticD: number;
+}
+
 /**
  * Get latest indicator values
  */
-export function getLatestIndicators(indicators: ReturnType<typeof calculateAllIndicators>) {
+export function getLatestIndicators(indicators: ReturnType<typeof calculateAllIndicators>): LatestIndicators {
   const lastIndex = indicators.sma.sma20.length - 1;
 
   return {
