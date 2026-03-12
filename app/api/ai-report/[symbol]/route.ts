@@ -1,4 +1,5 @@
 import { OpenAI } from 'openai';
+import { calculateAllIndicators, getLatestIndicators } from '@/lib/indicators';
 
 const client = new OpenAI({
   apiKey: process.env.NVIDIA_API_KEY || '',
@@ -13,17 +14,20 @@ export async function GET(
     const { symbol } = await params;
     const symbolUpper = symbol.toUpperCase();
 
-    // 1. 기본 주식 데이터 및 지표를 가져오는 내부 API 호출 (또는 직접 fetch)
-    const host = request.headers.get('host');
-    const protocol = host?.includes('localhost') ? 'http' : 'https';
-    const dataResponse = await fetch(`${protocol}://${host}/api/stock/${symbolUpper}`);
+    // 1. Fetch data directly from Flask backend to avoid internal fetch issues on Vercel
+    const FLASK_API_URL = process.env.NEXT_PUBLIC_FLASK_API_URL || 'http://localhost:5000';
+    const dataResponse = await fetch(`${FLASK_API_URL}/api/stock/${symbolUpper}?period=3mo`);
     
     if (!dataResponse.ok) {
-      throw new Error('Failed to fetch stock data for AI report');
+      throw new Error(`Failed to fetch from backend: ${dataResponse.statusText}`);
     }
 
-    const data = await dataResponse.json();
-    const { quote, companyInfo, indicators } = data;
+    const rawData = await dataResponse.json();
+    const { quote, candle, company_info: companyInfo } = rawData;
+
+    // Calculate indicators directly here to ensure consistency
+    const allIndicators = calculateAllIndicators(candle);
+    const indicators = getLatestIndicators(allIndicators);
 
     // 2. NVIDIA NIM 프롬프트 구성
     const isLeveragedETF = companyInfo.name?.includes('Bull') || companyInfo.name?.includes('Bear') ||
