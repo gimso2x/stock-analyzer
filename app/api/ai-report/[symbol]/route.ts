@@ -16,13 +16,25 @@ export async function GET(
 
     // 1. Fetch data directly from Flask backend to avoid internal fetch issues on Vercel
     const getBaseUrl = () => {
+      // Prioritize environment variable if set
       if (process.env.NEXT_PUBLIC_FLASK_API_URL) return process.env.NEXT_PUBLIC_FLASK_API_URL;
-      if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+      
+      // On Vercel, use the actual production domain to avoid Unauthorized errors from VERCEL_URL's internal protection
+      if (process.env.VERCEL) return 'https://stock-analyzer-culf.vercel.app';
+      
+      // Default local development
       return 'http://localhost:5000';
     };
     
     const FLASK_API_URL = getBaseUrl();
-    const dataResponse = await fetch(`${FLASK_API_URL}/api/stock/${symbolUpper}?period=3mo`);
+    console.log(`[AI-REPORT] Fetching data from: ${FLASK_API_URL}/api/stock/${symbolUpper}`);
+    
+    const dataResponse = await fetch(`${FLASK_API_URL}/api/stock/${symbolUpper}?period=3mo`, {
+      headers: {
+        'Accept': 'application/json',
+      },
+      next: { revalidate: 3600 } // Cache for 1 hour
+    });
     
     if (!dataResponse.ok) {
       throw new Error(`Failed to fetch from backend: ${dataResponse.statusText}`);
