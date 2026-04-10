@@ -1,6 +1,6 @@
 # Stock Analyzer
 
-한국 및 미국 주식을 위한 실시간 분석 웹 애플리케이션입니다. Next.js, Flask(Python), TypeScript, TailwindCSS로 구축되었습니다.
+AI-assisted stock analysis workspace for Korean and U.S. markets built with Next.js, Python, and real-time research workflows.
 
 ## Features
 
